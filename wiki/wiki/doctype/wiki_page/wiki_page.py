@@ -24,6 +24,7 @@ class WikiPage(WebsiteGenerator):
 		revision.wiki_page = self.name
 		revision.content = self.content
 		revision.message = "Create Wiki Page"
+		revision.raised_by = frappe.session.user
 		revision.insert()
 		frappe.cache().hdel("website_page", self.name)
 
