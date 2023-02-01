@@ -1,15 +1,16 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe
+
 import json
-from frappe.model.document import Document
-from ghdiff import diff
+
+import frappe
 from frappe import _
 from frappe.desk.form.utils import add_comment
+from frappe.model.document import Document
 from frappe.utils import cint
+from frappe.website.utils import cleanup_page_name
+from ghdiff import diff
 
 
 class WikiPagePatch(Document):
@@ -54,10 +55,11 @@ class WikiPagePatch(Document):
 		wiki_page_dict = {
 			"title": self.new_title,
 			"content": self.new_code,
-			"route": "/".join(self.wiki_page_doc.route.split("/")[:-1] + [frappe.scrub(self.new_title)]),
+			"route": "/".join(
+				self.wiki_page_doc.route.split("/")[:-1] + [cleanup_page_name(self.new_title)]
+			),
 			"published": 1,
-			"allow_guest": self.wiki_page_doc.allow_guest
-
+			"allow_guest": self.wiki_page_doc.allow_guest,
 		}
 
 		self.new_wiki_page.update(wiki_page_dict)
@@ -87,7 +89,7 @@ class WikiPagePatch(Document):
 
 	def create_new_child(self, sidebars):
 		for sidebar, items in sidebars.items():
-			for item in items:
+			for idx, item in enumerate(items):
 				if item["name"] == "new-wiki-page":
 					# new wiki page was created(/new)
 					wiki_sidebar_item = frappe.new_doc("Wiki Sidebar Item")
@@ -97,6 +99,7 @@ class WikiPagePatch(Document):
 						"parent": sidebar,
 						"parenttype": "Wiki Sidebar",
 						"parentfield": "sidebar_items",
+						"idx": idx,
 					}
 					wiki_sidebar_item.update(wiki_sidebar_item_dict)
 					wiki_sidebar_item.save()
@@ -133,9 +136,9 @@ class WikiPagePatch(Document):
 @frappe.whitelist()
 def add_comment_to_patch(reference_name, content):
 	email = frappe.session.user
-	name = frappe.db.get_value(
-		"User", frappe.session.user, ["first_name"], as_dict=True
-	).get("first_name")
+	name = frappe.db.get_value("User", frappe.session.user, ["first_name"], as_dict=True).get(
+		"first_name"
+	)
 	comment = add_comment("Wiki Page Patch", reference_name, content, email, name)
 	comment.timepassed = frappe.utils.pretty_date(comment.creation)
 	return comment

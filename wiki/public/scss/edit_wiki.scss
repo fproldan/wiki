@@ -8,7 +8,7 @@
 		width: 100%;
 		margin-right: 20px;
 		align-items: flex-start;
-		height: 33px;
+
 		i {
 			padding: 0.35rem 0.5rem 0.5rem 0.5rem;
 		}
@@ -26,11 +26,25 @@
 	}
 }
 
+@include media-breakpoint-down(md) {
+	.edit-page-head {
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		.edit-title {
+			flex: 100%;
+			margin-bottom: 20px;
+		}
+	}
+}
+
 .nav-tabs {
 	padding-bottom: 0;
 
 	.nav-item {
 		margin: 0 2rem 0 0;
+		@include media-breakpoint-down(sm) {
+			margin: 0 1.1rem 0 0;
+		}
 
 		.nav-link {
 			padding: 0.5rem 0;
@@ -72,6 +86,16 @@
 }
 
 // edit page
+
+.remove-sidebar-item {
+	float: right;
+	cursor: pointer;
+	margin: 5px 15px 0 0;
+}
+
+.trash-icon:hover {
+	color: var(--red-400);
+}
 
 .attachment-controls {
 	cursor: pointer;

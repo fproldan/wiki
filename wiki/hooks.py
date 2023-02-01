@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from . import __version__ as app_version
-
 app_name = "wiki"
 app_title = "Wiki"
 app_publisher = "Frappe"
@@ -14,8 +10,8 @@ app_license = "MIT"
 page_renderer = "wiki.wiki.doctype.wiki_page.wiki_renderer.WikiPageRenderer"
 
 website_route_rules = [
-	{"from_route": "/<path:wiki_page>/edit", "to_route": "/edit"},
-	{"from_route": "/<path:wiki_page>/new", "to_route": "/new"},
+	{"from_route": "/<path:wiki_page>/edit-wiki", "to_route": "/edit"},
+	{"from_route": "/<path:wiki_page>/new-wiki", "to_route": "/new"},
 	{"from_route": "/<path:wiki_page>/revisions", "to_route": "/revisions"},
 ]
 
