@@ -257,6 +257,8 @@ class WikiPage(WebsiteGenerator):
 		last_revision = frappe.db.get_value(
 			"Wiki Page Revision Item", filters={"wiki_page": self.name}, fieldname="parent"
 		)
+		if not last_revision:
+			return None
 		return frappe.get_doc("Wiki Page Revision", last_revision)
 
 	def clone(self, original, new):
