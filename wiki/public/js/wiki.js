@@ -2,7 +2,7 @@ window.Wiki = class Wiki {
   activate_sidebars() {
     $(".sidebar-item").each(function (index) {
       const active_class = "active";
-      let page_href = window.location.pathname;
+      let page_href = decodeURIComponent(window.location.pathname.slice(1));
       if (page_href.indexOf("#") !== -1) {
         page_href = page_href.slice(0, page_href.indexOf("#"));
       }
@@ -12,28 +12,20 @@ window.Wiki = class Wiki {
       }
     });
     // scroll the active sidebar item into view
-    let active_sidebar_item = $(".sidebar-item.active");
+    let active_sidebar_item = $(".doc-sidebar .sidebar-item.active");
     if (active_sidebar_item.length > 0) {
-      active_sidebar_item.get(1).scrollIntoView(true, {
-        behavior: "smooth",
-        block: "nearest",
-      });
-    }
-
-    // avoid active sidebar item to be hidden under logo
-    let web_sidebar = $(".web-sidebar");
-    if (web_sidebar.length > 0) {
-      web_sidebar.get(1).scrollBy({
-        top: -100,
-        behavior: "smooth",
-      });
+      setTimeout(function () {
+        active_sidebar_item.get(0).scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 50);
     }
   }
 
   toggle_sidebar(event) {
     $(event.currentTarget).parent().children("ul").toggleClass("hidden");
-    $(event.currentTarget).find(".drop-icon").toggleClass("hidden");
-    $(event.currentTarget).find(".drop-left").toggleClass("hidden");
+    $(event.currentTarget).find(".drop-icon").toggleClass("rotate");
     event.stopPropagation();
   }
 
@@ -43,19 +35,10 @@ window.Wiki = class Wiki {
       ".collapsible",
       this.toggle_sidebar,
     );
-    $(".sidebar-group").children("ul").addClass("hidden");
+
     $(".sidebar-item.active")
       .parents(" .web-sidebar .sidebar-group>ul")
       .removeClass("hidden");
-    const sidebar_groups = $(".sidebar-item.active").parents(
-      ".web-sidebar .sidebar-group",
-    );
-    sidebar_groups.each(function () {
-      $(this).children(".collapsible").find(".drop-left").addClass("hidden");
-    });
-    sidebar_groups.each(function () {
-      $(this).children(".collapsible").find(".drop-icon").removeClass("hidden");
-    });
   }
 
   scrolltotop() {
@@ -67,8 +50,9 @@ window.Wiki = class Wiki {
       const altSrc = $(".navbar-brand img").data("alt-src");
       const src = $(".navbar-brand img").attr("src");
       if (
-        altSrc !== "{{ light_mode_logo }}" &&
-        altSrc !== "{{ dark_mode_logo }}"
+        !["{{ light_mode_logo }}", "{{ dark_mode_logo }}", "None"].includes(
+          altSrc,
+        )
       ) {
         $(".navbar-brand img").attr("src", altSrc);
         $(".navbar-brand img").data("alt-src", src);
@@ -93,5 +77,26 @@ window.Wiki = class Wiki {
 
       localStorage.setItem("darkMode", $("body").hasClass("dark"));
     });
+  }
+
+  add_link_to_headings() {
+    $(".wiki-content")
+      .not(".revision-content")
+      .find("h2, h3, h4, h5, h6")
+      .each((i, $heading) => {
+        const text = $heading.textContent.trim();
+        $heading.id = text.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+        let id = $heading.id;
+        let $a = $('<a class="no-underline">')
+          .prop("href", "#" + id)
+          .attr("aria-hidden", "true").html(`
+					<svg xmlns="http://www.w3.org/2000/svg" style="width: 0.8em; height: 0.8em;" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+						stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-link">
+						<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+						<path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+					</svg>
+				`);
+        $($heading).append($a);
+      });
   }
 };
